@@ -9,8 +9,8 @@
 using namespace std;  
 //functions
 void print(TreeNode* root, int level);
-TreeNode* remove(TreeNode* realroot, TreeNode* root, TreeNode* parent, int num, int lr);
-bool printlevel(TreeNode* root, int level, int startlevel);
+TreeNode* remove(TreeNode* root, TreeNode* todelete);
+void printlevel(TreeNode* root, int level);
 void redblackupdate(TreeNode* root, TreeNode* parent);
 TreeNode* rotate_right(TreeNode* root, TreeNode* current);
 TreeNode* rotate_left(TreeNode* root, TreeNode* current);
@@ -22,7 +22,7 @@ void case3(TreeNode* current, TreeNode* uncle, TreeNode* root);
 TreeNode* case4(TreeNode* current, TreeNode* root);
 TreeNode* insert(TreeNode* root, int current);
 TreeNode* case4_2(TreeNode* current, TreeNode* root);
-void searchnode(TreeNode* root, int search);
+TreeNode* searchnode(TreeNode* root, int search);
 
 //add to tree
 TreeNode* insert(TreeNode* root, int current) {
@@ -116,7 +116,7 @@ TreeNode* insertrepairtree(TreeNode* root, TreeNode* current) {
   }
 //case 4 part 1
 TreeNode* case4(TreeNode* current, TreeNode* root) {
-  //cout << "Case 4" << endl;
+  // cout << "Case 4" << endl;
   TreeNode* p = current->getParent(root, current->getNumber(), 0);
   TreeNode* g = NULL;
   if (p != NULL) {
@@ -280,50 +280,44 @@ newnode->setRedBlack(red);
 
 //print levels
 void print (TreeNode* root, int level) {
-  int setlevel = 0;
-  bool done = true;
-  while (done == true) {
-    done = printlevel(root, setlevel, 0);
-    cout << endl;
-    setlevel = setlevel + 1;
-  }
+    printlevel(root, 0);
 }
 
 
 //prints numbers in each level, recursive
-bool printlevel(TreeNode* root, int level, int startlevel) {
-  bool check = false;
+void printlevel(TreeNode* root, int level) {
   if (root != NULL) {
-  if (startlevel == level) {
-    cout << root->getNumber() << root->getRedBlack() << " ";
-    check = true;
-  }
-  else {
+    if (root->getRight() != NULL) {
+      printlevel(root->getRight(), level + 1);
+    }
+    for (int i = level; i > 0; i--) {
+      cout << "   ";
+    }
+    cout << root->getNumber() << root->getRedBlack() << endl;
     if (root->getLeft() != NULL) {
-      check = printlevel(root->getLeft(), level, startlevel+1);
-      //    cout << " ";
+      printlevel(root->getLeft(), level + 1);
     }
     
-    if (root->getRight() != NULL) {
-      //cout << " ";
-      bool checkhold = printlevel(root->getRight(), level, startlevel+1);
-      if (check == true) {
-	return check;
-      }
-      else {
-	return checkhold;
-      }
-    }
-
-  }
-  return check;
   }
 
 }
 
 //remove
-TreeNode* remove (TreeNode* realroot, TreeNode* root, TreeNode* parent, int num, int lr) {
-  
+TreeNode* remove (TreeNode* root, TreeNode* todelete) {
+  if (todelete->getRight() == NULL && todelete->getLeft() == NULL && strcmp(todelete->getRedBlack(), "R") == 0) {
+    TreeNode* parent = todelete->getParent(root, todelete->getNumber(), 0);
+    if (parent->getRight() == todelete) {
+      parent->setRight(NULL);
+    }
+    else if (parent->getLeft() == todelete) {
+      parent->setLeft(NULL);
+    }
+    delete todelete;
+  }
+  else {
+    cout << "Will delete" << endl;
+  }
+  return root;
 }
 
 
@@ -331,101 +325,100 @@ TreeNode* remove (TreeNode* realroot, TreeNode* root, TreeNode* parent, int num,
 //rotate right to balance, used in case 4
 TreeNode* rotate_right(TreeNode* root, TreeNode* current)  {
   //cout << "Rotate right" << endl;
-  // print(root, 0);
-  current = current->getLeft();
-  TreeNode* newcurrent = current->getLeft();
-  // cout << current->getNumber() << endl;
-  //cout << newcurrent->getNumber() << endl;
+  bool checkroot = false;
+  if (current == root) {
+    checkroot = true;
+  }
+  //  cout << current->getNumber() << endl;
   TreeNode* parent = current->getParent(root, current->getNumber(), 0);
-  if (parent->getLeft() != NULL) {
-    parent->setLeft(newcurrent->getParent(root, newcurrent->getNumber(), 0)->getRight());
+  TreeNode* currentchild = current->getLeft();
+  TreeNode* child = currentchild->getLeft();
+  TreeNode* otherchild = NULL;
+  if (currentchild != NULL) {
+  otherchild = currentchild->getRight();
+  }
+  if (currentchild != NULL) {
+  currentchild->setRight(current);
+  }
+  if (current != NULL) {
+  current->setLeft(otherchild);
+  }
+  if (currentchild != NULL) {
+  currentchild->setLeft(child);
+  }
+  // cout << "Current " << current->getNumber() << endl;
+  if (parent != NULL && currentchild != NULL && parent->getNumber() > currentchild->getNumber()) {
+    parent->setLeft(currentchild);
+  }
+  else if (parent != NULL && currentchild != NULL && parent->getNumber() < currentchild->getNumber()) {
+    parent->setRight(currentchild);
+  }
+  if(checkroot == true) {
+    return currentchild;
   }
   else {
-  parent->setLeft(NULL);
-  }
-  TreeNode* newtop = current;
-  newtop->setLeft(newcurrent);
-  newtop->setRight(parent);
-  TreeNode* grandparent;
-  if (parent != NULL && parent != root) {
-  grandparent = parent->getParent(root, parent->getNumber(), 0);
-  }
-  else {
-  grandparent = NULL;
-  }
-  if (parent == NULL || parent == root && grandparent == NULL) {
-    return newtop;
-  }
-  else {
-    if (grandparent->getNumber() > newtop->getNumber()) {
-      grandparent->setLeft(newtop);
-    }
-    else if (grandparent->getNumber() < newtop->getNumber()) {
-      grandparent->setRight(newtop);
-    }
     return root;
-    }
+  }
 
-  
 }
 
 
 //rotate left to balance, used in case 4
 TreeNode* rotate_left(TreeNode* root, TreeNode* current) {
-  //cout << "Rotate left" << endl;
-  current = current->getRight();
-  TreeNode* newcurrent = current->getRight();
-  //cout << newcurrent->getNumber() << endl;
+  // cout << "Rotate left" << endl;
+  bool checkroot = false;
+  if (current == root) {
+    checkroot = true;
+  }
   TreeNode* parent = current->getParent(root, current->getNumber(), 0);
-  if (parent->getRight() != NULL) {
-    parent->setRight(newcurrent->getParent(root, newcurrent->getNumber(), 0)->getLeft());
+  TreeNode* currentchild = current->getRight();
+  TreeNode* child = currentchild->getRight();
+  TreeNode* otherchild = NULL;
+  if (currentchild != NULL) {
+  otherchild = currentchild->getLeft();
+  }
+  if (currentchild != NULL) {
+  currentchild->setLeft(current);
+  }
+  if (current != NULL ) {
+  current->setRight(otherchild);
+  }
+  if (currentchild != NULL) {
+  currentchild->setRight(child);
+  }
+  //  cout << "Current " << current->getNumber() << endl;
+  if (parent != NULL && currentchild != NULL && parent->getNumber() < currentchild->getNumber()) {
+    parent->setRight(currentchild);
+  }
+  else if (parent != NULL && currentchild != NULL && parent->getNumber() > currentchild->getNumber()) {
+    parent->setLeft(currentchild);
+  }
+  if (checkroot == true) {
+    return currentchild;
   }
   else {
-    parent->setRight(NULL);
-  }
-  TreeNode* newtop = current;
-  newtop->setRight(newcurrent);
-  newtop->setLeft(parent);
-  TreeNode* grandparent = NULL;
-  if (parent != NULL && parent != root) {
-    grandparent = parent->getParent(root, parent->getNumber(), 0);
-  }
-  else {
-    grandparent = NULL;
-  }
-  if (parent == NULL || parent == root && grandparent == NULL) {
-    return newtop;
-  }
-  else {
-    if (grandparent->getNumber() > newtop->getNumber()) {
-      grandparent->setLeft(newtop);
-    }
-    else if (grandparent->getNumber() < newtop->getNumber()) {
-      grandparent->setRight(newtop);
-    }
     return root;
   }
 
-
 }
 
-void searchnode(TreeNode* root, int search) {
+TreeNode* searchnode(TreeNode* root, int search) {
   if (root->getNumber() == search) {
     cout << "Number is part of tree" << endl;
-    return;
+    return root;
   }
   else {
     while (root->getNumber() != search) {
       if (root->getLeft() != NULL) {
 	if (root->getLeft()->getNumber() == search) {
 	  cout << "Number is part of tree" << endl;
-	  return;
+	  return root->getLeft();
 	}
       }
       if (root->getRight() != NULL) {
 	if (root->getRight()->getNumber() == search) {
 	  cout << "Number is part of tree" << endl;
-	  return;
+	  return root->getRight();
 	}
 
       }
@@ -437,12 +430,12 @@ void searchnode(TreeNode* root, int search) {
       }
       else {
 	cout << "Number is not part of tree" << endl;
-	return;
+	return NULL;
       }
     }
     //    else {
       cout << "Number is not part of tree" << endl;
-      return;
+      return NULL;
       //}
   }
 }
@@ -600,6 +593,18 @@ root =	insert(root, datanum);
     cin >> search;
     searchnode(root, search);
     cout << "Enter 1 for add, 2 to find the parent of a node, 3 to search for a node" << endl;
+    cin >>response;
+  }
+  if (response == 4) {
+    cout << "What node do you want to delete?" << endl;
+    int deleter;
+    cin >> deleter;
+    TreeNode* todelete = searchnode(root, deleter);
+    if (todelete != NULL) {
+    root = remove(root, todelete);
+    }
+    print(root, 0);
+    cout << "Next" << endl;
     cin >>response;
   }
   }
