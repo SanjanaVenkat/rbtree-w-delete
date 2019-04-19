@@ -304,8 +304,10 @@ void printlevel(TreeNode* root, int level) {
 
 //remove
 TreeNode* remove (TreeNode* root, TreeNode* todelete) {
-  if (todelete->getRight() == NULL && todelete->getLeft() == NULL && strcmp(todelete->getRedBlack(), "R") == 0) {
-    TreeNode* parent = todelete->getParent(root, todelete->getNumber(), 0);
+  char red[2] = "R";
+  char black[2] = "B";
+  TreeNode* parent = todelete->getParent(root, todelete->getNumber(), 0);
+  if (todelete->getRight() == NULL && todelete->getLeft() == NULL && strcmp(todelete->getRedBlack(), "R") == 0 && parent != NULL) {
     if (parent->getRight() == todelete) {
       parent->setRight(NULL);
     }
@@ -314,6 +316,34 @@ TreeNode* remove (TreeNode* root, TreeNode* todelete) {
     }
     delete todelete;
   }
+  else if (todelete->getRight() == NULL && todelete->getLeft() == NULL && strcmp(todelete->getRedBlack(), "B") == 0 && parent != NULL) {
+    if (parent->getRight() == todelete) {
+      parent->setRight(NULL);
+      if (parent->getLeft()->getLeft() != NULL) {
+      rotate_right(root, parent);
+      }
+      else {
+	cout << "Balance" << endl;
+      }
+      parent->getLeft()->setRedBlack(red);
+    }
+    else if (parent->getLeft() == todelete) {
+      parent->setLeft(NULL);
+      if (parent->getRight()->getRight() != NULL) {
+      rotate_left(root, parent);
+      }
+      else {
+	cout << "Balance" << endl;
+      }
+      parent->getRight()->setRedBlack(red);
+    }
+    TreeNode* grandparent = parent->getParent(root, parent->getNumber(), 0);
+    if (grandparent != NULL) {
+    grandparent->setRedBlack(black);
+    }
+    delete todelete;
+    }
+  
   else {
     cout << "Will delete" << endl;
   }
@@ -403,6 +433,7 @@ TreeNode* rotate_left(TreeNode* root, TreeNode* current) {
 }
 
 TreeNode* searchnode(TreeNode* root, int search) {
+  if (root != NULL) {
   if (root->getNumber() == search) {
     cout << "Number is part of tree" << endl;
     return root;
@@ -433,7 +464,8 @@ TreeNode* searchnode(TreeNode* root, int search) {
 	return NULL;
       }
     }
-    //    else {
+  }
+  // else {
       cout << "Number is not part of tree" << endl;
       return NULL;
       //}
