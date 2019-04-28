@@ -44,6 +44,10 @@ void TreeNode::setRedBlack(char* rb) {
   strcpy(redblack,rb);
 }
 
+void TreeNode::setNumber(int numb) {
+  number = numb;
+}
+
 TreeNode* TreeNode::getParent(TreeNode* root, int current, int willoutput) {
   if (root == NULL) {
      parent = NULL;

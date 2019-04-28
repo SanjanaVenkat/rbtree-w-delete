@@ -28,7 +28,7 @@ void delete2(TreeNode* root, TreeNode* todelete);
 void delete3(TreeNode* root, TreeNode* todelete);
 void delete4(TreeNode* root, TreeNode* todelete);
 void delete5(TreeNode* root, TreeNode* todelete);
-
+void delete6(TreeNode* root, TreeNode* todelete);
 //add to tree
 TreeNode* insert(TreeNode* root, int current) {
   TreeNode* realroot = root;
@@ -310,12 +310,13 @@ void printlevel(TreeNode* root, int level) {
 
 TreeNode* delete1(TreeNode* root, TreeNode* todelete) {
   cout << "Delete case 1" << endl;
+  if (todelete != NULL) {
   if (todelete->getParent(root, todelete->getNumber(), 0) != NULL) {
     delete2(root, todelete);
     }
   else {
-    cout << "Deleting root" << endl;
-    return root;
+    root = todelete;
+  }
   }
 }
 
@@ -361,24 +362,33 @@ void delete3(TreeNode* root, TreeNode* todelete) {
   if (parent != NULL && sibling != NULL) {
     if ((strcmp(parent->getRedBlack(), black) == 0 && strcmp(sibling->getRedBlack(), black) == 0)) {
 	if (sibling->getLeft() == NULL && sibling->getRight() == NULL) {
-	  sibling->setRedBlack(red);
-      	}
-	else if (sibling->getLeft() != NULL && strcmp(sibling->getLeft()->getRedBlack(), black) == 0 && sibling->getRight() == NULL) {
-	  sibling->setRedBlack(red);
+	   sibling->setRedBlack(red);
+	  delete1(root, parent);
+    	}
+	 if (sibling->getLeft() != NULL && strcmp(sibling->getLeft()->getRedBlack(), black) == 0 && sibling->getRight() == NULL) {
+      	  sibling->setRedBlack(red);
+	  delete1(root, parent);
 	}
-	else if (sibling->getRight() != NULL && strcmp(sibling->getRight()->getRedBlack(), black) == 0 && sibling->getLeft() == NULL) {
-	  sibling->setRedBlack(red);
+	 if (sibling->getRight() != NULL && strcmp(sibling->getRight()->getRedBlack(), black) == 0 && sibling->getLeft() == NULL) {
+	   sibling->setRedBlack(red);
+	  delete1(root, parent);
 	}
-	  else if (sibling->getLeft() != NULL && strcmp(sibling->getLeft()->getRedBlack(), black) == 0 && sibling->getRight() != NULL && strcmp(sibling->getRight()->getRedBlack(), black) == 0) {
-	    sibling->setRedBlack(red);
+       if (sibling->getLeft() != NULL && strcmp(sibling->getLeft()->getRedBlack(), black) == 0 && sibling->getRight() != NULL && strcmp(sibling->getRight()->getRedBlack(), black) == 0) {
+	 sibling->setRedBlack(red);
+	    delete1(root, parent);
 	  }
+	else {
+   delete4(root, todelete);
+ }
       }
-    
-    }
-   
+  else {
+   delete4(root, todelete);
+ }  
+  }
  else {
    delete4(root, todelete);
  }
+  
 
 }
 
@@ -435,67 +445,190 @@ void delete5(TreeNode* root, TreeNode* todelete) {
   if (parent != NULL) {
   if (parent->getLeft() == todelete) {
     sibling = parent->getRight();
+    if (sibling != NULL && strcmp(sibling->getRedBlack(), black) == 0) {
+	if (sibling->getLeft() != NULL && strcmp(sibling->getLeft()->getRedBlack(),red) == 0) {
+	  if (sibling->getRight() == NULL) {
+	    rotate_right(root, sibling);
+	    sibling->setRedBlack(red);
+	    sibling->getParent(root, sibling->getNumber(), 0)->setRedBlack(black);
+	  }
+	  else if (strcmp(sibling->getRight()->getRedBlack(), black) == 0) {
+	    rotate_right(root, sibling);
+	    sibling->setRedBlack(red);
+	     sibling->getParent(root, sibling->getNumber(), 0)->setRedBlack(black);
+	  }
+	}
+      }
+      
   }
   else if (parent->getRight() == todelete) {
     sibling = parent->getLeft();
+    if (sibling != NULL && strcmp(sibling->getRedBlack(), black) == 0) {
+        if (sibling->getRight() != NULL && strcmp(sibling->getRight()->getRedBlack(),red) == 0) {
+          if (sibling->getLeft() == NULL) {
+            rotate_left(root, sibling);
+            sibling->setRedBlack(red);
+            sibling->getParent(root, sibling->getNumber(), 0)->setRedBlack(black);
+          }
+          else if (strcmp(sibling->getLeft()->getRedBlack(), black) == 0) {
+            rotate_left(root, sibling);
+            sibling->setRedBlack(red);
+             sibling->getParent(root, sibling->getNumber(), 0)->setRedBlack(black);
+          }
+        }
+      }
+   
+   }
+  }
+
+  delete6(root, todelete);
+
+  }
+
+
+void delete6 (TreeNode* root, TreeNode* todelete) {
+  cout << "Delete case 6" << endl;
+char red[2] = "R";
+  char black[2] = "B";
+  TreeNode* parent = todelete->getParent(root, todelete->getNumber(), 0);
+  TreeNode* sibling = NULL;;
+  if (parent != NULL) {
+  if (parent->getLeft() == todelete) {
+    sibling = parent->getRight();
+    if (sibling != NULL && strcmp (sibling->getRedBlack(), black) == 0) {
+      if (sibling->getRight() != NULL && strcmp(sibling->getRight()->getRedBlack(), red) == 0) {
+	rotate_left(root, parent);
+	char parentcolor[2];
+	strcpy(parentcolor, parent->getRedBlack());
+	parent->setRedBlack(sibling->getRedBlack());
+	sibling->setRedBlack(parentcolor);
+	cout << "parent" << parent->getNumber() << endl;
+      }
+    }
+    else if (sibling == NULL) {
+      if (todelete->getLeft() != NULL) {
+	parent->setLeft(todelete->getLeft());
+	parent->setRight(todelete->getRight());
+      }
+      else if (todelete->getRight() != NULL) {
+	parent->setLeft(todelete->getRight());
+	parent->setRight(todelete->getLeft());
+      }
+      else {
+	parent->setLeft(NULL);
+      }
+      parent->setRedBlack(red);
+    }
+  }
+  else if (parent->getRight() == todelete) {
+    sibling = parent->getLeft();
+ if (sibling != NULL && strcmp (sibling->getRedBlack(), black) == 0) {
+      if (sibling->getLeft() != NULL && strcmp(sibling->getLeft()->getRedBlack(), red) == 0) {
+        rotate_right(root, parent);
+	char parentcolor[2];
+        strcpy(parentcolor, parent->getRedBlack());
+        parent->setRedBlack(sibling->getRedBlack());
+        sibling->setRedBlack(parentcolor);
+	  cout << "parent" << parent->getNumber() << endl;
+
+      }
+    }
+ else if (sibling == NULL) {
+   if (todelete->getRight() != NULL) {
+     parent->setRight(todelete->getRight());
+     parent->setLeft(todelete->getLeft());
+   }
+   else if (todelete->getLeft() != NULL) {
+     parent->setRight(todelete->getLeft());
+     parent->setLeft(todelete->getLeft());
+   }
+   else {
+     parent->setRight(NULL);
+   }
+   parent->setRedBlack(red);
+ }
   }
   }
-
-
-
 }
-
 	
 //remove
 TreeNode* remove (TreeNode* root, TreeNode* todelete) {
-  /*  char red[2] = "R";
+  char red[2] = "R";
   char black[2] = "B";
-  TreeNode* parent = todelete->getParent(root, todelete->getNumber(), 0);
-  if (todelete->getRight() == NULL && todelete->getLeft() == NULL && strcmp(todelete->getRedBlack(), "R") == 0 && parent != NULL) {
-    if (parent->getRight() == todelete) {
-      parent->setRight(NULL);
+  if (todelete != NULL) {
+    TreeNode* child = NULL;
+    TreeNode* todeletedata = todelete;
+    if (todelete->getLeft() != NULL) {
+    child = todelete->getLeft();
+    int todeletenumber = todeletedata->getNumber();
+    todelete->setNumber(todeletenumber);
+    todelete->setRedBlack(todeletedata->getRedBlack());
     }
-    else if (parent->getLeft() == todelete) {
-      parent->setLeft(NULL);
+    else if (todelete->getRight() != NULL) {
+      child = todelete->getRight();
     }
-    delete todelete;
-  }
-  else if (todelete->getRight() == NULL && todelete->getLeft() == NULL && strcmp(todelete->getRedBlack(), "B") == 0 && parent != NULL) {
-    if (parent->getRight() == todelete) {
-      parent->setRight(NULL);
-      if (parent->getLeft()->getLeft() != NULL) {
-      rotate_right(root, parent);
-      }
-      else {
-	cout << "Balance" << endl;
-      }
-      parent->getLeft()->setRedBlack(red);
-    }
-    else if (parent->getLeft() == todelete) {
-      parent->setLeft(NULL);
-      if (parent->getRight()->getRight() != NULL) {
-      rotate_left(root, parent);
-      }
-      else {
-	cout << "Balance" << endl;
-      }
-      parent->getRight()->setRedBlack(red);
-    }
-    TreeNode* grandparent = parent->getParent(root, parent->getNumber(), 0);
-    if (grandparent != NULL) {
-    grandparent->setRedBlack(black);
-    }
-    delete todelete;
-    }
-  
-  else {
-    cout << "Will delete" << endl;
-  }
-  return root;
-  */
+    if (child != NULL) {
+      cout << "Child" << child->getNumber() << endl;
 }
+    else if (child == NULL) {
+      cout << "Child is NULL" << endl;
+    }
+    TreeNode* parent = todelete->getParent(root, todelete->getNumber(), 0);
+    if (strcmp(todelete->getRedBlack(), red) == 0) {
+      if (parent->getLeft() == NULL || parent->getRight() == NULL) {
+      cout << "todelete is red" << endl;
+      if (parent->getLeft() == todelete) {
+	parent->setLeft(child);
+      }
+      else if (parent->getRight() == todelete) {
+	parent->setRight(child);
+      }
+    if (child != NULL) {
+      child->setRedBlack(black);
+    }
+    delete todelete;
+    //return root;
+      }
+      else {
+	delete1(root, todelete);
+      }
+    }
 
+    
+    else if (strcmp(todelete->getRedBlack(), black) == 0) {
+      cout << "todelete is black" << endl;
+      if (parent == NULL) {
+	cout << "parent is null" << endl;
+	delete1(root, todelete);
+      }
+      
+      else if (parent != NULL) {
+	cout << "parent is not null" << endl;
+	if (parent->getLeft() == todelete) {
+	  parent->setLeft(child);
+	}
+	else if (parent->getRight() == todelete) {
+	  parent->setRight(child);
+	}
+      delete todelete;
+      delete1(root, child);
+      }
+      else if (parent != NULL && strcmp(parent->getRedBlack(), black) == 0) {
+	cout << "parent is black" << endl;
+	if (parent->getLeft() == todelete) {
+	  parent->setLeft(child);
+	}
+	else if (parent->getRight() == todelete) {
+	  parent->setRight(child);
+	}
+	delete todelete;
+	//return root;						  
+      }
+    }
 
+  }
+  
+}
 
 //rotate right to balance, used in case 4
 TreeNode* rotate_right(TreeNode* root, TreeNode* current)  {
@@ -778,7 +911,7 @@ root =	insert(root, datanum);
     cin >> deleter;
     TreeNode* todelete = searchnode(root, deleter);
     if (todelete != NULL) {
-    root = delete1(root, todelete);
+     remove(root, todelete);
     }
     print(root, 0);
     cout << "Next" << endl;

@@ -12,6 +12,7 @@ class TreeNode {
   void setLeft(TreeNode* newleft);
   TreeNode* getRight();
   void setRight(TreeNode* newright);
+  void setNumber(int numb);
   int getNumber();
   char* getRedBlack();
   void setRedBlack(char* rb);
