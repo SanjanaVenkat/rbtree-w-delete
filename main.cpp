@@ -22,7 +22,7 @@ void case3(TreeNode* current, TreeNode* uncle, TreeNode* root);
 TreeNode* case4(TreeNode* current, TreeNode* root);
 TreeNode* insert(TreeNode* root, int current);
 TreeNode* case4_2(TreeNode* current, TreeNode* root);
-TreeNode* searchnode(TreeNode* root, int search);
+TreeNode* searchnode(TreeNode* root, int search, int print);
 TreeNode* delete1(TreeNode* root, TreeNode* todelete);
 void delete2(TreeNode* root, TreeNode* todelete);
 void delete3(TreeNode* root, TreeNode* todelete);
@@ -192,7 +192,7 @@ TreeNode* case2(TreeNode* current, TreeNode* root) {
   }
   char red[2] = "R";
   if (strcmp(p->getRedBlack(), "B") == 0) {
-    if (p->getNumber() > current->getNumber()) {
+    if (p->getNumber() >= current->getNumber()) {
       p->setLeft(current);
       current->setRedBlack(red);
     }
@@ -224,7 +224,7 @@ void insertrecursive(TreeNode* root, TreeNode* n) {
   char black[2] = "B";
   char red[2] = "R";
   TreeNode* newnode = n;
-  if (root != NULL && newnode->getNumber() < root->getNumber()) {
+  if (root != NULL && newnode->getNumber() <= root->getNumber()) {
 
     if (root->getLeft() != NULL) {
       TreeNode* left = root->getLeft();
@@ -455,7 +455,7 @@ void delete4(TreeNode* root, TreeNode* todelete) {
     
 //delete case 5
 void delete5(TreeNode* root, TreeNode* todelete) {
-  cout << "Delete case 5" << endl;
+  //cout << "Delete case 5" << endl;
   char red[2] = "R";
   char black[2] = "B";
   TreeNode* parent = todelete->getParent(root, todelete->getNumber(), 0);
@@ -578,6 +578,11 @@ TreeNode* remove (TreeNode* root, TreeNode* todelete) {
       //  cout << "Need to delete root" << endl;
       //delete root
       TreeNode* newroot = NULL;
+      if (root->getLeft() == NULL && root->getRight() == NULL) {
+	cout << "Deleting root with no children" << endl;
+	delete root;
+	return NULL;
+      }
       if (root->getLeft() != NULL) {
 	newroot = root->getLeft();
       }
@@ -748,7 +753,7 @@ TreeNode* rotate_right(TreeNode* root, TreeNode* current)  {
   currentchild->setLeft(child);
   }
   // cout << "Current " << current->getNumber() << endl;
-  if (parent != NULL && currentchild != NULL && parent->getNumber() > currentchild->getNumber()) {
+  if (parent != NULL && currentchild != NULL && parent->getNumber() >= currentchild->getNumber()) {
     parent->setLeft(currentchild);
   }
   else if (parent != NULL && currentchild != NULL && parent->getNumber() < currentchild->getNumber()) {
@@ -791,7 +796,7 @@ TreeNode* rotate_left(TreeNode* root, TreeNode* current) {
   if (parent != NULL && currentchild != NULL && parent->getNumber() < currentchild->getNumber()) {
     parent->setRight(currentchild);
   }
-  else if (parent != NULL && currentchild != NULL && parent->getNumber() > currentchild->getNumber()) {
+  else if (parent != NULL && currentchild != NULL && parent->getNumber() >= currentchild->getNumber()) {
     parent->setLeft(currentchild);
   }
   if (checkroot == true) {
@@ -803,41 +808,51 @@ TreeNode* rotate_left(TreeNode* root, TreeNode* current) {
 
 }
 //search to see if any node is in the tree
-TreeNode* searchnode(TreeNode* root, int search) {
+TreeNode* searchnode(TreeNode* root, int search, int printer) {
   if (root != NULL) {
   if (root->getNumber() == search) {
+    if (print == 0) {
     cout << "Number is part of tree" << endl;
+    }
     return root;
   }
   else {
     while (root->getNumber() != search) {
       if (root->getLeft() != NULL) {
 	if (root->getLeft()->getNumber() == search) {
+	  if (print == 0) {
 	  cout << "Number is part of tree" << endl;
+	  }
 	  return root->getLeft();
 	}
       }
       if (root->getRight() != NULL) {
 	if (root->getRight()->getNumber() == search) {
+	  if (print == 0) {
 	  cout << "Number is part of tree" << endl;
+	  }
 	  return root->getRight();
 	}
 
       }
-      if (root->getLeft() != NULL && root->getNumber() > search) {
+      if (root->getLeft() != NULL && root->getNumber() >= search) {
 	root = root->getLeft();
       }
       else if (root->getRight() != NULL && root->getNumber() < search) {
 	root = root->getRight();
       }
       else {
+	if (print == 0) {
 	cout << "Number is not part of tree" << endl;
+	}
 	return NULL;
       }
     }
   }
   // else {
+  if (print == 0) {
       cout << "Number is not part of tree" << endl;
+  }
       return NULL;
       //}
   }
@@ -895,7 +910,7 @@ int main() {
   cin >> response;
   TreeNode* root = NULL;
   while (running != false) {
-    //add
+    //add if number is not already part of the tree
   if (response == 1) {
     int responset;
     cout << "Enter 1 to enter from command line, or 2 to have numbers read from file" << endl;
@@ -910,10 +925,11 @@ int main() {
   int num = 0;
   while (counter != numofnum) {
     cin >> num;
-    if (root == NULL) {
+    TreeNode* search = searchnode(root, num, 1);
+    if (root == NULL && search == NULL) {
 root = insert(root, num);
     }
-  else {
+    else if (search == NULL){
 root =  insert(root, num);
   }
   counter++;
@@ -929,7 +945,9 @@ root =  insert(root, num);
     inData.open(filename);
     int datanum;
     int num;
-    while (inData >> num) {
+    TreeNode* search = root;
+    while (inData >> num && search == NULL) {
+      search = searchnode(root, num, 1);
       datanum = num;
       if (root == NULL) {
        	root = insert(root, datanum);
@@ -978,9 +996,11 @@ root =	insert(root, datanum);
     int current = 0;
     cout << "Enter node to find parent of" << endl;
     cin >> current;
+    if (root != NULL) {
     TreeNode* holder = root->getParent(root, current, 4);
     if (holder != NULL) {
     cout << holder->getNumber() << endl;
+    }
     }
     else {
       cout << "Parent does not exist" << endl;
@@ -995,7 +1015,7 @@ root =	insert(root, datanum);
     cout << "What node do you want to search for?" << endl;
     int search;
     cin >> search;
-    searchnode(root, search);
+    searchnode(root, search, 0);
     cout << "Enter 1 for add, 2 to find the parent of a node, 3 to search for a node, 4 to delete, and 5 to print" << endl;
     cin >>response;
   }
@@ -1003,11 +1023,16 @@ root =	insert(root, datanum);
     cout << "What node do you want to delete?" << endl;
     int deleter;
     cin >> deleter;
-    TreeNode* todelete = searchnode(root, deleter);
-    if (todelete != NULL) {
+    TreeNode* todelete = searchnode(root, deleter, 1);
+    if (todelete != NULL && todelete == root) {
+      root = remove(root, todelete);
+    }
+    else if (todelete != NULL) {
      remove(root, todelete);
     }
-    print(root, 0);
+    if (root != NULL) {
+     print(root, 0);
+    }
     cout << "Enter 1 to add a node, 2 to find parent, 3 to search for a node, 4 to delete, and 5 to print" << endl;
     cin >>response;
   }
