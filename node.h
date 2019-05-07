@@ -4,23 +4,15 @@
 using namespace std;
 
 
-class TreeNode {
+class Node {
  public:
-  TreeNode(int n, char* rb);
-  ~TreeNode();
-  TreeNode* getLeft();
-  void setLeft(TreeNode* newleft);
-  TreeNode* getRight();
-  void setRight(TreeNode* newright);
-  void setNumber(int numb);
+  Node(int n);
+  ~Node();
+  void setAdjacent(Node* newadjacent);
   int getNumber();
-  char* getRedBlack();
-  void setRedBlack(char* rb);
-  TreeNode* getParent(TreeNode* root, int current, int willoutput);
+  void setNumber(int n);
+  Node* getAdjacent();
  private:
-  TreeNode* left;
-  TreeNode* right;
-  TreeNode* parent;
+  Node* adjacent;
   int number;
-  char redblack[1];
 };
