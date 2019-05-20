@@ -598,9 +598,19 @@ TreeNode* remove (TreeNode* root, TreeNode* todelete) {
 	root->setNumber(newroot->getNumber());
 	TreeNode* testroot = rotate_left(root, root);
 	testroot->setRedBlack(black);
+	if (testroot->getLeft()->getRight() != NULL && strcmp(testroot->getLeft()->getRight()->getRedBlack(), red) == 0) {
+	  testroot->getLeft()->setRedBlack(black);
+	}
+	if (testroot->getLeft()->getLeft() != NULL && strcmp(testroot->getLeft()->getLeft()->getRedBlack(), red) == 0) {
+	    testroot->getLeft()->setRedBlack(black);
+	  	}
+       else {
 	testroot->getLeft()->setRedBlack(red);
-	return testroot;
-      }
+       }
+      
+	  return testroot;
+       
+       }
       else {
       //      cout << newroot->getNumber() << endl;
       TreeNode* newparent = newroot->getParent(root, newroot->getNumber(), 0);
