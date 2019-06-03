@@ -17,7 +17,14 @@ class TreeNode {
   char* getRedBlack();
   void setRedBlack(char* rb);
   TreeNode* getParent(TreeNode* root, int current, int willoutput);
- private:
+  TreeNode* getParentn();
+  void setParentn(TreeNode* n);
+  bool hasRedChild();
+  void moveDown(TreeNode *nParent);
+  TreeNode *sibling();
+  TreeNode *uncle();
+  bool  isOnLeft();
+ //private:
   TreeNode* left;
   TreeNode* right;
   TreeNode* parent;
