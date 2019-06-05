@@ -1053,9 +1053,7 @@ void redblackupdate(TreeNode* root, TreeNode* parent) {
 
 }
 
-/*************************************************************************************************************************************/
-// INSERT - this section is based on the Wikipedia page: https://en.wikipedia.org/wiki/Red%E2%80%93black_tree
-/*************************************************************************************************************************************/
+//new insert (from wikipedia)
 
 TreeNode* parentn(TreeNode* n) {
  return n->getParentn(); // NULL for root node
@@ -1180,7 +1178,6 @@ void insert_case4n(TreeNode* n)
  insert_case4step2n(n);
 }
 
-// XXXX
 
 void insert_repair_treen(TreeNode* n) {
  char black[2] = "B";
@@ -1238,9 +1235,7 @@ TreeNode* insertn(TreeNode* root, int current)
  return root;
 }
 
-/*************************************************************************************************************************************/
-// REMOVE - this section is based on https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/
-/*************************************************************************************************************************************/
+//new remove (from geeksforgeeks)
 
   // left rotates the given node 
   void leftRotate(TreeNode *&droot, TreeNode *x) { 
