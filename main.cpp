@@ -9,6 +9,8 @@
 using namespace std;  
 
 // new functions
+
+
 TreeNode* insertn(TreeNode* root, int current);
 void insert_recursen(TreeNode* root, TreeNode* n) ;
 void insert_repair_treen(TreeNode* n) ;
@@ -23,7 +25,7 @@ TreeNode* unclen(TreeNode* n) ;
 TreeNode* siblingn(TreeNode* n) ;
 TreeNode* grandparentn(TreeNode* n) ;
 TreeNode* parentn(TreeNode* n) ;
-void fixDoubleBlack(TreeNode *x, TreeNode* droot, char red[2], char black[2]); 
+void fixDoubleBlack(TreeNode *&droot, TreeNode *x); 
 
 //functions
 void print(TreeNode* root, int level);
@@ -589,7 +591,9 @@ char red[2] = "R";
 }
 	
 //remove
-TreeNode* remove(TreeNode* root, TreeNode* todelete, TreeNode* droot, char red[2], char black[2]) {
+TreeNode* remove(TreeNode* root, TreeNode* todelete) {
+  char red[2] = "R";
+  char black[2] = "B";
   if (todelete != NULL) {
     if (todelete == root) {
       //  cout << "Need to delete root" << endl;
@@ -1049,7 +1053,9 @@ void redblackupdate(TreeNode* root, TreeNode* parent) {
 
 }
 
-// INSERT - based on wikipedia
+/*************************************************************************************************************************************/
+// INSERT - this section is based on the Wikipedia page: https://en.wikipedia.org/wiki/Red%E2%80%93black_tree
+/*************************************************************************************************************************************/
 
 TreeNode* parentn(TreeNode* n) {
  return n->getParentn(); // NULL for root node
@@ -1174,6 +1180,7 @@ void insert_case4n(TreeNode* n)
  insert_case4step2n(n);
 }
 
+// XXXX
 
 void insert_repair_treen(TreeNode* n) {
  char black[2] = "B";
@@ -1225,66 +1232,67 @@ TreeNode* insertn(TreeNode* root, int current)
 
  // find the new root to return
  root = n;
- while (parentn(root) != NULL) {
+ while (parentn(root) != NULL)
   root = parentn(root);
- }
+
  return root;
 }
 
-
-// REMOVE- based on other resource
+/*************************************************************************************************************************************/
+// REMOVE - this section is based on https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/
+/*************************************************************************************************************************************/
 
   // left rotates the given node 
-void leftRotate(TreeNode *x, TreeNode* droot, char red[2], char black[2]) { 
+  void leftRotate(TreeNode *&droot, TreeNode *x) { 
     // new parent will be node's right child 
     TreeNode *nParent = x->right; 
   
     // update droot if current node is droot 
-    if (x == droot) {
+    if (x == droot) 
       droot = nParent; 
-    }
+  
     x->moveDown(nParent); 
   
     // connect x with new parent's left element 
     x->right = nParent->left; 
     // connect new parent's left element with node 
     // if it is not null 
-    if (nParent->left != NULL) {
+    if (nParent->left != NULL) 
       nParent->left->parent = x; 
-    }
+  
     // connect new parent with x 
     nParent->left = x; 
   } 
   
-void rightRotate(TreeNode *x, TreeNode* droot, char red[2], char black[2]) { 
+  void rightRotate(TreeNode *&droot, TreeNode *x) { 
     // new parent will be node's left child 
     TreeNode *nParent = x->left; 
   
     // update droot if current node is droot 
-    if (x == droot) {
+    if (x == droot) 
       droot = nParent; 
-    }
+  
     x->moveDown(nParent); 
   
     // connect x with new parent's right element 
     x->left = nParent->right; 
     // connect new parent's right element with node 
     // if it is not null 
-    if (nParent->right != NULL) {
+    if (nParent->right != NULL) 
       nParent->right->parent = x; 
-    }
+  
     // connect new parent with x 
     nParent->right = x; 
   } 
   
-void swapColors(TreeNode *x1, TreeNode *x2, TreeNode* droot, char red[2], char black[2]) { 
+  void swapColors(TreeNode *x1, TreeNode *x2) { 
     char temp[1]; 
     strcpy(temp,x1->redblack); 
     strcpy(x1->redblack, x2->redblack); 
     strcpy(x2->redblack,temp); 
   } 
   
-void swapValues(TreeNode *u, TreeNode *v, TreeNode* droot, char red[2], char black[2]) { 
+  void swapValues(TreeNode *u, TreeNode *v) { 
     int temp; 
     temp = u->number; 
     u->number = v->number; 
@@ -1292,7 +1300,9 @@ void swapValues(TreeNode *u, TreeNode *v, TreeNode* droot, char red[2], char bla
   } 
   
   // fix red red at given node 
-void fixRedRed(TreeNode *x, TreeNode* droot, char red[2], char black[2]) { 
+  void fixRedRed(TreeNode *&droot, TreeNode *x) { 
+    char black[2] = "B";
+    char red[2] = "R";
     // if x is droot redblack it black and return 
     if (x == droot) { 
       strcpy(x->redblack, black);
@@ -1300,9 +1310,8 @@ void fixRedRed(TreeNode *x, TreeNode* droot, char red[2], char black[2]) {
     } 
   
     // initialize parent, grandparent, uncle 
-    TreeNode *parent = x->parent;
-    TreeNode *grandparent = parent->parent;
-    TreeNode *uncle = x->uncle(); 
+    TreeNode *parent = x->parent, *grandparent = parent->parent, 
+         *uncle = x->uncle(); 
   
     if (strcmp(parent->redblack, black)) { 
       if (uncle != NULL && !strcmp(uncle->redblack, red)) { 
@@ -1310,30 +1319,30 @@ void fixRedRed(TreeNode *x, TreeNode* droot, char red[2], char black[2]) {
         strcpy(parent->redblack, black); 
         strcpy(uncle->redblack, black); 
         strcpy(grandparent->redblack, red);
-        fixRedRed(grandparent, droot, red, black); 
+        fixRedRed(droot, grandparent); 
       } else { 
         // Else perform LR, LL, RL, RR 
         if (parent->isOnLeft()) { 
           if (x->isOnLeft()) { 
             // for left right 
-            swapColors(parent, grandparent, droot, red, black); 
+            swapColors(parent, grandparent); 
           } else { 
-            leftRotate(parent, droot, red, black); 
-            swapColors(x, grandparent, droot, red, black); 
+            leftRotate(droot, parent); 
+            swapColors(x, grandparent); 
           } 
           // for left left and left right 
-          rightRotate(grandparent, droot, red, black); 
+          rightRotate(droot, grandparent); 
         } else { 
           if (x->isOnLeft()) { 
             // for right left 
-            rightRotate(parent, droot, red, black); 
-            swapColors(x, grandparent, droot, red, black); 
+            rightRotate(droot, parent); 
+            swapColors(x, grandparent); 
           } else { 
-            swapColors(parent, grandparent, droot, red, black); 
+            swapColors(parent, grandparent); 
           } 
   
           // for right right and right left 
-          leftRotate(grandparent, droot, red, black); 
+          leftRotate(droot, grandparent); 
         } 
       } 
     } 
@@ -1341,41 +1350,42 @@ void fixRedRed(TreeNode *x, TreeNode* droot, char red[2], char black[2]) {
   
   // find node that do not have a left child 
   // in the subtree of the given node 
-TreeNode *successor(TreeNode *x, TreeNode* droot, char red[2], char black[2]) { 
+  TreeNode *successor(TreeNode *x) { 
     TreeNode *temp = x; 
   
-    while (temp->left != NULL) { 
-      temp = temp->left;
-    }
+    while (temp->left != NULL) 
+      temp = temp->left; 
   
     return temp; 
   } 
   
   // find node that replaces a deleted node in BST 
-TreeNode *BSTreplace(TreeNode *x, TreeNode* droot, char red[2], char black[2]) { 
+  TreeNode *BSTreplace(TreeNode *x) { 
+    char black[2] = "B";
+    char red[2] = "R";
     // when node have 2 children 
-  if (x->left != NULL and x->right != NULL) {
-      return successor(x->right, droot, red, black); 
-} 
+    if (x->left != NULL and x->right != NULL) 
+      return successor(x->right); 
+  
     // when leaf 
-  if (x->left == NULL and x->right == NULL) { 
+    if (x->left == NULL and x->right == NULL) 
       return NULL; 
-  }
+  
     // when single child 
-  if (x->left != NULL) {
+    if (x->left != NULL) 
       return x->left; 
-}
-  else {
+    else
       return x->right; 
-  }
   } 
   
   // deletes the given node 
-void deleteTreeNode(TreeNode *v, TreeNode* droot, char red[2], char black[2]) { 
-  TreeNode *u = BSTreplace(v, droot, red, black); 
+  void deleteTreeNode(TreeNode *&droot, TreeNode *v) { 
+    char black[2] = "B";
+    char red[2] = "R";
+    TreeNode *u = BSTreplace(v); 
   
     // True when u and v are both black 
-  bool uvBlack = ((u == NULL or !strcmp(u->redblack,black)) and (!strcmp(v->redblack, black))); 
+    bool uvBlack = ((u == NULL or !strcmp(u->redblack,black)) and (!strcmp(v->redblack, black))); 
     TreeNode *parent = v->parent; 
   
     if (u == NULL) { 
@@ -1387,7 +1397,7 @@ void deleteTreeNode(TreeNode *v, TreeNode* droot, char red[2], char black[2]) {
         if (uvBlack) { 
           // u and v both black 
           // v is leaf, fix double black at v 
-          fixDoubleBlack(v, droot, red, black); 
+          fixDoubleBlack(droot, v); 
         } else { 
           // u or v is red 
           if (v->sibling() != NULL) 
@@ -1424,7 +1434,7 @@ void deleteTreeNode(TreeNode *v, TreeNode* droot, char red[2], char black[2]) {
         u->parent = parent; 
         if (uvBlack) { 
           // u and v both black, fix double black at u 
-          fixDoubleBlack(u, droot, red, black); 
+          fixDoubleBlack(droot, u); 
         } else { 
           // u or v red, redblack u black 
           strcpy(u->redblack, black);
@@ -1434,11 +1444,13 @@ void deleteTreeNode(TreeNode *v, TreeNode* droot, char red[2], char black[2]) {
     } 
   
     // v has 2 children, swap numberues with successor and recurse 
-    swapValues(u, v, droot, red, black); 
-    deleteTreeNode(u, droot, red, black); 
+    swapValues(u, v); 
+    deleteTreeNode(droot, u); 
   } 
   
-void fixDoubleBlack(TreeNode *x, TreeNode* droot, char red[2], char black[2]) { 
+  void fixDoubleBlack(TreeNode *&droot, TreeNode *x) { 
+    char black[2] = "B";
+    char red[2] = "R";
     if (x == droot) 
       // Reached droot 
       return; 
@@ -1446,7 +1458,7 @@ void fixDoubleBlack(TreeNode *x, TreeNode* droot, char red[2], char black[2]) {
     TreeNode *sibling = x->sibling(), *parent = x->parent; 
     if (sibling == NULL) { 
       // No sibiling, double black pushed up 
-      fixDoubleBlack(parent, droot, red, black); 
+      fixDoubleBlack(droot, parent); 
     } else { 
       if (!strcmp(sibling->redblack, red)) { 
         // Sibling red 
@@ -1454,12 +1466,12 @@ void fixDoubleBlack(TreeNode *x, TreeNode* droot, char red[2], char black[2]) {
         strcpy(sibling->redblack, black);
         if (sibling->isOnLeft()) { 
           // left case 
-          rightRotate(parent, droot, red, black); 
+          rightRotate(droot, parent); 
         } else { 
           // right case 
-          leftRotate(parent, droot, red, black); 
+          leftRotate(droot, parent); 
         } 
-        fixDoubleBlack(x, droot, red, black); 
+        fixDoubleBlack(droot, x); 
       } else { 
         // Sibling black 
         if (sibling->hasRedChild()) { 
@@ -1469,24 +1481,24 @@ void fixDoubleBlack(TreeNode *x, TreeNode* droot, char red[2], char black[2]) {
               // left left 
               strcpy(sibling->left->redblack , sibling->redblack); 
               strcpy(sibling->redblack , parent->redblack); 
-              rightRotate(parent, droot, red, black); 
+              rightRotate(droot, parent); 
             } else { 
               // right left 
               strcpy(sibling->left->redblack , parent->redblack); 
-              rightRotate(sibling, droot, red, black); 
-              leftRotate(parent, droot, red, black); 
+              rightRotate(droot, sibling); 
+              leftRotate(droot, parent); 
             } 
           } else { 
             if (sibling->isOnLeft()) { 
               // left right 
               strcpy(sibling->right->redblack , parent->redblack); 
-              leftRotate(sibling, droot, red, black); 
-              rightRotate(parent, droot, red, black); 
+              leftRotate(droot, sibling); 
+              rightRotate(droot, parent); 
             } else { 
               // right right 
               strcpy(sibling->right->redblack , sibling->redblack); 
               strcpy(sibling->redblack , parent->redblack); 
-              leftRotate(parent, droot, red, black); 
+              leftRotate(droot, parent); 
             } 
           } 
           strcpy(parent->redblack , black); 
@@ -1494,7 +1506,7 @@ void fixDoubleBlack(TreeNode *x, TreeNode* droot, char red[2], char black[2]) {
           // 2 black children 
           strcpy(sibling->redblack, red); 
           if (!strcmp(parent->redblack, black)) 
-            fixDoubleBlack(parent, droot, red, black); 
+            fixDoubleBlack(droot, parent); 
           else
             strcpy(parent->redblack, black); 
         } 
@@ -1503,19 +1515,17 @@ void fixDoubleBlack(TreeNode *x, TreeNode* droot, char red[2], char black[2]) {
   } 
   
   
-TreeNode* removen(TreeNode* root, TreeNode* todelete, TreeNode* droot, char red[2], char black[2])
+TreeNode* removen(TreeNode* root, TreeNode* todelete)
 {
-  droot = root;
-  deleteTreeNode(todelete, droot, red, black);
+  TreeNode* droot = root;
+  deleteTreeNode(droot, todelete);
   return droot;
 }
 
+/*************************************************************************************************************************************/
 
 //main
 int main() {
-  TreeNode* droot;
-  char black[2] = "B";
-  char red[2] = "R";
   bool running = true;
   int response = 0;
   cout << "Enter 1 for add, 2 to find parent of a node, 3 to search for a node, 4 to delete, and 5 to print" << endl;
@@ -1547,7 +1557,7 @@ int main() {
 	root =  insertn(root, num);
     }
     else  {
-	cout << "Skipping duplicate: " << num << endl;
+	cout << "Skipping dupliate: " << num << endl;
     }
 
     counter++;
@@ -1592,7 +1602,7 @@ int main() {
   //prints parent of any node
   if (response == 2) {
 
-    /*
+    /******
     int current = 0;
     cout << "Enter node to find parent of" << endl;
     cin >> current;
@@ -1606,7 +1616,7 @@ int main() {
       cout << "Parent does not exist" << endl;
     }
    cout << "Enter 1 for add, 2 to find parent of a node, 3 to search for a node, 4 to delete, and 5 to print" << endl;
-   */
+   *******/
 
    cin >> response;
   }
@@ -1628,8 +1638,9 @@ int main() {
     TreeNode* todelete = searchnode(root, deleter, 1);
     TreeNode* newroot;
     if (todelete != NULL) {
-      root = removen(root, todelete, droot, red, black);
+    	root = removen(root, todelete);
     }
+
     /*
     if (newroot != NULL && newroot->getLeft() != root->getLeft() && newroot->getRight() != root->getRight()) {
       root = newroot;
